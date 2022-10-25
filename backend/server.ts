@@ -1,19 +1,39 @@
 const { ApolloServer, gql } = require("apollo-server");
 
+const books = [
+  {
+    id: 1,
+    title: "オズの魔法使",
+    author: "ライマン・フランク・ボーム",
+  },
+  {
+    id: 2,
+    title: "風と共に去りぬ",
+    author: "マーガレット・ミッチェル",
+  },
+];
+
 const typeDefs = gql`
   type Query {
-    books: [String]
-    amount: Int
+    books: [Book!]!
+    book(id: Int!): Book
+  }
+
+  type Book {
+    id: Int!
+    title: String!
+    author: String!
   }
 `;
 
 const resolvers = {
   Query: {
-    books: () => {
-      return ["オズの魔法使", "風と共に去りぬ", "a"];
-    },
-    amount: () => {
-      return 3;
+    books: () => books,
+    book: (parent: any, args: any, context: any) => {
+      const bookId = args.id;
+      const book = books.find((book) => book.id === bookId);
+      if (!book) return null;
+      return book;
     },
   },
 };
