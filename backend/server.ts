@@ -6,18 +6,21 @@ const books = [
     title: "オズの魔法使",
     author: "ライマン・フランク・ボーム",
     categoryId: "literature",
+    isRead: true,
   },
   {
     id: 2,
     title: "風と共に去りぬ",
     author: "マーガレット・ミッチェル",
     categoryId: "literature",
+    isRead: true,
   },
   {
     id: 3,
     title: "人を動かす",
     author: "D・カーネギー",
     categoryId: "self-help",
+    isRead: false,
   },
 ];
 
@@ -34,7 +37,7 @@ const categories = [
 
 const typeDefs = gql`
   type Query {
-    books: [Book!]!
+    books(filter: BooksInput): [Book!]!
     book(id: Int!): Book
     categories: [Category!]!
     category(id: ID!): Category
@@ -52,11 +55,28 @@ const typeDefs = gql`
     name: String!
     books: [Book!]!
   }
+  input BooksInput {
+    isRead: Boolean
+  }
 `;
 
 const resolvers = {
   Query: {
-    books: () => books,
+    books: (
+      parent: undefined,
+      { filter }: { filter: { isRead: boolean } },
+      { books }: any
+    ) => {
+      let filteredBooks = books;
+
+      if (filter.isRead === true) {
+        filteredBooks = filteredBooks.filter((book: any) => {
+          return book.isRead;
+        });
+      }
+
+      return filteredBooks;
+    },
     book: (parent: undefined, args: { id: number }, context: {}) => {
       const bookId = args.id;
       const book = books.find((book) => book.id === bookId);
@@ -91,6 +111,10 @@ const resolvers = {
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: {
+    books,
+    categories,
+  },
 });
 
 server.listen(4000, () => {
