@@ -55,8 +55,21 @@ const typeDefs = gql`
     name: String!
     books: [Book!]!
   }
+
   input BooksInput {
     isRead: Boolean
+  }
+
+  type Mutation {
+    addBook(input: AddBookInput!): Book!
+  }
+
+  input AddBookInput {
+    id: Int!
+    title: String!
+    author: String!
+    categoryId: String!
+    isRead: Boolean!
   }
 `;
 
@@ -104,6 +117,22 @@ const resolvers = {
       const categoryId = parent.categoryId;
       console.log(categoryId);
       return categories.find((category) => category.id === categoryId); // findは単体
+    },
+  },
+
+  Mutation: {
+    addBook: (parent: any, { input }: any, { books }: any) => {
+      const { id, title, author, categoryId, isRead } = input;
+      const newBook = {
+        id,
+        title,
+        author,
+        categoryId,
+        isRead,
+      };
+      books.push(newBook);
+
+      return newBook;
     },
   },
 };
